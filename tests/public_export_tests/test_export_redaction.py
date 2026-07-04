@@ -47,6 +47,17 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
                 "domains": "[]",
                 "risk_domains": "[]",
                 "notes": "Internal profile note.",
+            },
+            {
+                "contributor_id": "C002",
+                "display_name": "Source B",
+                "type": "person",
+                "status": "public_surface_verified",
+                "source_posture": "nutrition_epistemology",
+                "priority": "P2",
+                "domains": "[]",
+                "risk_domains": "[]",
+                "notes": "Unsafe contributor.",
             }
         ],
     )
@@ -83,6 +94,21 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
                 "claim_extraction_status": "pending",
                 "copyright_status": "metadata_and_short_quotes_only",
                 "notes": "Transcript timestamp notes.",
+            },
+            {
+                "source_id": "SRC002",
+                "title": "Unsafe Source",
+                "source_type": "video",
+                "url": "https://example.org/unsafe-source",
+                "archive_url": "https://example.org/unsafe-source/archive",
+                "published_date": "2024-02-01",
+                "accessed_date": "2024-02-02",
+                "contributors": "[\"C002\"]",
+                "source_quality": "SQ4_full_source_with_transcript_timestamp",
+                "transcript_status": "available",
+                "claim_extraction_status": "pending",
+                "copyright_status": "metadata_and_short_quotes_only",
+                "notes": "Unsafe source notes.",
             }
         ],
     )
@@ -132,6 +158,20 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
                 "created_at": "",
                 "updated_at": "",
             },
+            {
+                "claim_id": "CCL-CLM-000003",
+                "normalized_claim": "Another safe claim.",
+                "claim_family": "fiber",
+                "claim_type": "clinical_outcome",
+                "risk_class": "R1_medium",
+                "diet_context": "[]",
+                "specificity": "[]",
+                "duration_context": "lifetime",
+                "evidence_status": "not_reviewed",
+                "protocol_status": "public_safe",
+                "created_at": "",
+                "updated_at": "",
+            },
         ],
     )
 
@@ -163,6 +203,20 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
                 "receipt_url": "https://example.org/receipt",
                 "rhetoric_strength": "assertive",
                 "claim_strength": "moderate",
+                "source_quality": "SQ4_full_source_with_transcript_timestamp",
+                "do_not_infer": "[\"Do not infer...\"]",
+            },
+            {
+                "claim_source_id": "CST002",
+                "claim_id": "CCL-CLM-000002",
+                "contributor_id": "C002",
+                "source_id": "SRC002",
+                "verbatim_quote": "Unsafe quote",
+                "timestamp_start": "00:02:00",
+                "timestamp_end": "00:02:30",
+                "receipt_url": "https://example.org/unsafe-receipt",
+                "rhetoric_strength": "assertive",
+                "claim_strength": "high",
                 "source_quality": "SQ4_full_source_with_transcript_timestamp",
                 "do_not_infer": "[\"Do not infer...\"]",
             }
@@ -197,6 +251,19 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
                 "evidence_maturity": "M0_no_evidence_located",
                 "domains": "[]",
                 "notes": "Private evidence notes.",
+            },
+            {
+                "evidence_id": "EVD002",
+                "title": "Unsafe Trial",
+                "authors": "[]",
+                "year": "2024",
+                "evidence_type": "systematic_review",
+                "url": "https://example.org/unsafe-evidence",
+                "doi": "",
+                "institution_or_journal": "",
+                "evidence_maturity": "M0_no_evidence_located",
+                "domains": "[]",
+                "notes": "Unsafe notes.",
             }
         ],
     )
@@ -225,6 +292,17 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
                 "notes": "Internal note.",
                 "reviewer": "agent",
                 "review_date": "2026-07-04",
+            },
+            {
+                "claim_evidence_id": "CEV002",
+                "claim_id": "CCL-CLM-000002",
+                "evidence_id": "EVD002",
+                "relationship": "bounds_claim",
+                "direction": "mixed",
+                "strength": "weak",
+                "notes": "Unsafe evidence link.",
+                "reviewer": "agent",
+                "review_date": "2026-07-04",
             }
         ],
     )
@@ -249,6 +327,18 @@ def _make_fixture_repo(tmp_path: Path) -> Path:
                 "claim_id": "CCL-CLM-000001",
                 "protocol_status": "public_language_safe",
                 "approved_wording": "Example approved wording.",
+                "not_approved_wording": "[\"do not...\"]",
+                "subgroups": "[]",
+                "contraindications": "[]",
+                "monitoring": "[]",
+                "review_date": "",
+                "next_review_due": "",
+            },
+            {
+                "protocol_decision_id": "PD002",
+                "claim_id": "CCL-CLM-000002",
+                "protocol_status": "research_only",
+                "approved_wording": "Unsafe wording",
                 "not_approved_wording": "[\"do not...\"]",
                 "subgroups": "[]",
                 "contraindications": "[]",
@@ -294,8 +384,25 @@ def test_export_scrubs_forbidden_fields_from_public_outputs(tmp_path: Path):
 
     with (repo / "public_release" / "exports" / "claims.csv").open(newline="", encoding="utf-8") as fp:
         rows = list(csv.DictReader(fp))
-    assert len(rows) == 1
-    assert rows[0]["claim_id"] == "CCL-CLM-000001"
+    exported_claim_ids = {row["claim_id"] for row in rows}
+    assert exported_claim_ids == {"CCL-CLM-000001", "CCL-CLM-000003"}
+
+    with (repo / "public_release" / "exports" / "claim_sources.csv").open(newline="", encoding="utf-8") as fp:
+        claim_source_rows = list(csv.DictReader(fp))
+    assert len(claim_source_rows) == 1
+    assert claim_source_rows[0]["claim_id"] == "CCL-CLM-000001"
+
+    with (repo / "public_release" / "exports" / "sources.csv").open(newline="", encoding="utf-8") as fp:
+        source_rows = list(csv.DictReader(fp))
+    assert [row["source_id"] for row in source_rows] == ["SRC001"]
+
+    with (repo / "public_release" / "exports" / "contributors.csv").open(newline="", encoding="utf-8") as fp:
+        contributor_rows = list(csv.DictReader(fp))
+    assert [row["contributor_id"] for row in contributor_rows] == ["C001"]
+
+    with (repo / "public_release" / "exports" / "evidence.csv").open(newline="", encoding="utf-8") as fp:
+        evidence_rows = list(csv.DictReader(fp))
+    assert [row["evidence_id"] for row in evidence_rows] == ["EVD001"]
 
 
 def test_validation_detects_forbidden_export_fields(tmp_path: Path):

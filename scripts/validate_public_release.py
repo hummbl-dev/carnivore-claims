@@ -85,6 +85,77 @@ def _validate_forbidden_fields(path: Path) -> None:
             raise SystemExit(f"Forbidden fields in public export {path.name}: {leaked}")
 
 
+def _load_claim_ids(path: Path) -> set[str]:
+    with path.open("r", encoding="utf-8", newline="") as fp:
+        reader = csv.DictReader(fp)
+        return {row.get("claim_id", "") for row in reader if row.get("claim_id")}
+
+
+def _load_related_ids(path: Path, key: str) -> set[str]:
+    with path.open("r", encoding="utf-8", newline="") as fp:
+        reader = csv.DictReader(fp)
+        return {row.get(key, "") for row in reader if row.get(key)}
+
+
+def _validate_export_scope(root: Path) -> None:
+    claims_path = root / "public_release" / "exports" / "claims.csv"
+    claim_ids = _load_claim_ids(claims_path)
+
+    source_rows = root / "public_release" / "exports" / "sources.csv"
+    if source_rows.exists():
+        source_ids = _load_related_ids(root / "public_release" / "exports" / "claim_sources.csv", "source_id")
+        if source_rows.exists() and source_ids:
+            with source_rows.open("r", encoding="utf-8", newline="") as fp:
+                for line_number, row in enumerate(csv.DictReader(fp), start=2):
+                    source_id = row.get("source_id")
+                    if source_id and source_id not in source_ids:
+                        raise SystemExit(f"Public source not referenced by safe claims: {source_id} (row={line_number})")
+
+    for filename, key in (
+        ("contributors.csv", "contributor_id"),
+        ("claim_sources.csv", "claim_id"),
+        ("claim_evidence.csv", "claim_id"),
+        ("protocol_decisions.csv", "claim_id"),
+    ):
+        path = root / "public_release" / "exports" / filename
+        if not path.exists():
+            continue
+        with path.open("r", encoding="utf-8", newline="") as fp:
+            reader = csv.DictReader(fp)
+            rows = list(reader)
+            if filename == "contributors.csv":
+                claim_sources = _load_related_ids(root / "public_release" / "exports" / "claim_sources.csv", "contributor_id")
+                for row_number, row in enumerate(rows, start=2):
+                    contributor_id = row.get(key, "")
+                    if contributor_id and contributor_id not in claim_sources:
+                        raise SystemExit(
+                            f"Public contributor not referenced by safe claims: "
+                            f"{contributor_id} (row={row_number}, file={filename})"
+                        )
+            elif filename in {"claim_sources.csv", "claim_evidence.csv", "protocol_decisions.csv"}:
+                for row_number, row in enumerate(rows, start=2):
+                    claim_id = row.get(key, "")
+                    if claim_id and claim_id not in claim_ids:
+                        raise SystemExit(
+                            f"Non-safe claim leaked in public export {filename}: "
+                            f"claim_id={claim_id}, row={row_number}"
+                        )
+
+    evidence_rows = root / "public_release" / "exports" / "evidence.csv"
+    if evidence_rows.exists():
+        claim_evidence_path = root / "public_release" / "exports" / "claim_evidence.csv"
+        allowed_evidence = _load_related_ids(claim_evidence_path, "evidence_id") if claim_evidence_path.exists() else set()
+        if allowed_evidence:
+            with evidence_rows.open("r", encoding="utf-8", newline="") as fp:
+                for row_number, row in enumerate(csv.DictReader(fp), start=2):
+                    evidence_id = row.get("evidence_id", "")
+                    if evidence_id and evidence_id not in allowed_evidence:
+                        raise SystemExit(
+                            f"Public evidence not linked to safe claim: "
+                            f"{evidence_id} (row={row_number})"
+                        )
+
+
 def main() -> int:
     root = _resolve_root(os.environ.get("CCL_REPO_ROOT"))
     export_dir = root / "public_release" / "exports"
@@ -98,6 +169,7 @@ def main() -> int:
         _validate_forbidden_fields(path)
 
     _validate_claim_rows(export_dir / "claims.csv")
+    _validate_export_scope(root)
     return 0
 
 

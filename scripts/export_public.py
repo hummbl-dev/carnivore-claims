@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import os
 from pathlib import Path
+from typing import Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 INPUT = ROOT / "data"
@@ -43,6 +44,48 @@ def _is_public_safe_protocol_status(value: str) -> bool:
     return normalized in PUBLIC_SAFE_PROTOCOL_STATUSES
 
 
+def _read_csv_rows(root: Path, filename: str) -> list[dict[str, str]]:
+    src = root / "data" / filename
+    if not src.exists():
+        return []
+    with src.open("r", encoding="utf-8", newline="") as sf:
+        return list(csv.DictReader(sf))
+
+
+def _extract_public_safe_claim_ids(root: Path) -> set[str]:
+    claims = _read_csv_rows(root, "claims.csv")
+    safe_claim_ids: set[str] = set()
+    for row in claims:
+        if _is_public_safe_protocol_status(row.get("protocol_status", "")):
+            safe_claim_ids.add(row.get("claim_id", ""))
+    return {claim_id for claim_id in safe_claim_ids if claim_id}
+
+
+def _extract_safe_claim_sources(root: Path, safe_claim_ids: set[str]) -> tuple[set[str], set[str], set[str]]:
+    source_ids: set[str] = set()
+    contributor_ids: set[str] = set()
+    evidence_ids: set[str] = set()
+
+    for row in _read_csv_rows(root, "claim_sources.csv"):
+        if row.get("claim_id") not in safe_claim_ids:
+            continue
+        claim_source_id = row.get("source_id", "").strip()
+        claim_contributor_id = row.get("contributor_id", "").strip()
+        if claim_source_id:
+            source_ids.add(claim_source_id)
+        if claim_contributor_id:
+            contributor_ids.add(claim_contributor_id)
+
+    for row in _read_csv_rows(root, "claim_evidence.csv"):
+        if row.get("claim_id") not in safe_claim_ids:
+            continue
+        evidence_id = row.get("evidence_id", "").strip()
+        if evidence_id:
+            evidence_ids.add(evidence_id)
+
+    return source_ids, contributor_ids, evidence_ids
+
+
 def _resolve_root(root_override: str | None = None) -> Path:
     if root_override:
         return Path(root_override).expanduser().resolve()
@@ -59,7 +102,12 @@ def _redact_row(row: dict[str, str], filename: str) -> dict[str, str]:
     return redacted
 
 
-def _copy_csv(root: Path, src_name: str, dst_name: str, keep_rows: bool = False):
+def _copy_csv(
+    root: Path,
+    src_name: str,
+    dst_name: str,
+    row_filter: Callable[[dict[str, str]], bool] | None = None,
+):
     input_dir = root / "data"
     output_dir = root / "public_release" / "exports"
     src = input_dir / src_name
@@ -74,25 +122,32 @@ def _copy_csv(root: Path, src_name: str, dst_name: str, keep_rows: bool = False)
         writer = csv.DictWriter(df, fieldnames=fieldnames)
         writer.writeheader()
         for row in reader:
-            if not keep_rows:
-                writer.writerow(_redact_row(row, src_name))
-                continue
-            if not _is_public_safe_protocol_status(row.get("protocol_status", "")):
+            if row_filter is not None and not row_filter(row):
                 continue
             writer.writerow(_redact_row(row, src_name))
 
 
 def main() -> int:
     root = _resolve_root(os.environ.get("CCL_REPO_ROOT"))
+    safe_claim_ids = _extract_public_safe_claim_ids(root)
+    safe_source_ids, safe_contributor_ids, safe_evidence_ids = _extract_safe_claim_sources(
+        root,
+        safe_claim_ids,
+    )
+
     output_dir = root / "public_release" / "exports"
     output_dir.mkdir(parents=True, exist_ok=True)
-    _copy_csv(root, "contributors.csv", "contributors.csv")
-    _copy_csv(root, "sources.csv", "sources.csv")
-    _copy_csv(root, "claims.csv", "claims.csv", keep_rows=True)
-    _copy_csv(root, "claim_sources.csv", "claim_sources.csv")
-    _copy_csv(root, "evidence.csv", "evidence.csv")
-    _copy_csv(root, "claim_evidence.csv", "claim_evidence.csv")
-    _copy_csv(root, "protocol_decisions.csv", "protocol_decisions.csv")
+
+    _copy_csv(root, "contributors.csv", "contributors.csv",
+              row_filter=lambda row: row.get("contributor_id", "") in safe_contributor_ids)
+    _copy_csv(root, "sources.csv", "sources.csv",
+              row_filter=lambda row: row.get("source_id", "") in safe_source_ids)
+    _copy_csv(root, "claims.csv", "claims.csv", row_filter=lambda row: _is_public_safe_protocol_status(row.get("protocol_status", "")))
+    _copy_csv(root, "claim_sources.csv", "claim_sources.csv", row_filter=lambda row: row.get("claim_id", "") in safe_claim_ids)
+    _copy_csv(root, "evidence.csv", "evidence.csv", row_filter=lambda row: row.get("evidence_id", "") in safe_evidence_ids)
+    _copy_csv(root, "claim_evidence.csv", "claim_evidence.csv", row_filter=lambda row: row.get("claim_id", "") in safe_claim_ids)
+    _copy_csv(root, "protocol_decisions.csv", "protocol_decisions.csv", row_filter=lambda row: row.get("claim_id", "") in safe_claim_ids)
+
     return 0
 
 
