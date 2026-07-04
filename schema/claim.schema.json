@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hummbl-dev/carnivore-claims/schema/claim.schema.json",
+  "title": "Carnivore Claims Ledger Claim",
+  "type": "object",
+  "required": [
+    "claim_id",
+    "normalized_claim",
+    "claim_family",
+    "claim_type",
+    "risk_class",
+    "evidence_status",
+    "protocol_status"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^CCL-CLM-[0-9]{6}$"
+    },
+    "normalized_claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": [
+        "mechanistic",
+        "clinical_outcome",
+        "biomarker",
+        "safety",
+        "evolutionary",
+        "epistemic",
+        "protocol",
+        "testimonial",
+        "nutrient_essentiality",
+        "comparative"
+      ]
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": [
+        "R0_low",
+        "R1_medium",
+        "R2_high",
+        "R3_critical",
+        "R4_unsafe_or_forbidden"
+      ]
+    },
+    "diet_context": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "specificity": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "duration_context": {
+      "type": "string"
+    },
+    "evidence_status": {
+      "type": "string",
+      "enum": [
+        "observed_claim",
+        "repeated_claim",
+        "mechanistically_plausible",
+        "anecdote_supported",
+        "case_report_supported",
+        "supported_for_subgroup",
+        "supported_by_indirect_evidence",
+        "supported_by_direct_evidence",
+        "supported_general_population",
+        "contested",
+        "overstated",
+        "unsupported",
+        "contradicted",
+        "high_risk_without_clinician",
+        "do_not_use_publicly",
+        "insufficient_evidence",
+        "needs_red_team",
+        "not_reviewed"
+      ]
+    },
+    "protocol_status": {
+      "type": "string",
+      "enum": [
+        "not_reviewed",
+        "research_only",
+        "not_canon",
+        "candidate_for_private_experimentation",
+        "admissible_with_qualifiers",
+        "admissible_for_subgroup",
+        "admissible_for_clinician_supervised_context",
+        "public_language_safe",
+        "do_not_use_publicly",
+        "contraindicated",
+        "retired"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
