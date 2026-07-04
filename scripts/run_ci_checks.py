@@ -23,7 +23,13 @@ def _check_non_empty_dirs():
 
 
 def main() -> int:
-    for script in ["validate_schema.py", "check_receipts.py", "dedupe_claims.py"]:
+    for script in [
+        "validate_schema.py",
+        "check_receipts.py",
+        "dedupe_claims.py",
+        "export_public.py",
+        "validate_public_release.py",
+    ]:
         module_path = ROOT / "scripts" / script
         if not module_path.exists():
             raise SystemExit(f"Missing required check script: {module_path}")
