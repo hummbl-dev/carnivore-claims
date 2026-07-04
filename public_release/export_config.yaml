@@ -1,0 +1,4 @@
+source: data
+require_public_safe: true
+public_language_only: true
+include_unreviewed: false

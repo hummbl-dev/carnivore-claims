@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source",
+  "type": "object",
+  "required": ["source_id", "title", "source_type", "url", "source_quality"],
+  "properties": {
+    "source_id": { "type": "string" },
+    "title": { "type": "string" },
+    "source_type": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "archive_url": { "type": "string" },
+    "published_date": { "type": "string" },
+    "accessed_date": { "type": "string" },
+    "contributors": { "type": "array", "items": { "type": "string" } },
+    "source_quality": { "type": "string" },
+    "transcript_status": { "type": "string" },
+    "claim_extraction_status": { "type": "string" },
+    "copyright_status": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}

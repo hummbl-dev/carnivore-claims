@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Contributor",
+  "type": "object",
+  "required": ["contributor_id", "display_name", "type", "status"],
+  "properties": {
+    "contributor_id": { "type": "string" },
+    "display_name": { "type": "string" },
+    "type": { "type": "string" },
+    "status": { "type": "string" },
+    "source_posture": { "type": "array", "items": { "type": "string" } },
+    "priority": { "type": "string" },
+    "domains": { "type": "array", "items": { "type": "string" } },
+    "risk_domains": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}

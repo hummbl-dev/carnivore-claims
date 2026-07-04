@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProtocolDecision",
+  "type": "object",
+  "required": ["protocol_decision_id", "claim_id", "protocol_status", "approved_wording"],
+  "properties": {
+    "protocol_decision_id": { "type": "string" },
+    "claim_id": { "type": "string" },
+    "protocol_status": { "type": "string" },
+    "approved_wording": { "type": "string" },
+    "not_approved_wording": { "type": "array", "items": { "type": "string" } },
+    "subgroups": { "type": "array", "items": { "type": "string" } },
+    "contraindications": { "type": "array", "items": { "type": "string" } },
+    "monitoring": { "type": "array", "items": { "type": "string" } },
+    "review_date": { "type": "string" },
+    "next_review_due": { "type": "string" }
+  },
+  "additionalProperties": true
+}

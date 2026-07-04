@@ -1,0 +1,27 @@
+name: ccl-ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run repository checks
+        run: |
+          python scripts/validate_schema.py
+          python scripts/check_receipts.py
+          python scripts/dedupe_claims.py
+          python scripts/run_ci_checks.py
