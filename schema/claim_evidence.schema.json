@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClaimEvidence",
+  "type": "object",
+  "required": ["claim_evidence_id", "claim_id", "evidence_id", "relationship", "strength"],
+  "properties": {
+    "claim_evidence_id": { "type": "string" },
+    "claim_id": { "type": "string" },
+    "evidence_id": { "type": "string" },
+    "relationship": { "type": "string" },
+    "direction": { "type": "string" },
+    "strength": { "type": "string" },
+    "notes": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "review_date": { "type": "string" }
+  },
+  "additionalProperties": true
+}

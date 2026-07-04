@@ -1,1 +1,1 @@
-claim_id,normalized_claim,claim_family,claim_type,risk_class,diet_context,specificity,duration_context,evidence_status,protocol_status,created_at,updated_at,notes
+claim_id,normalized_claim,claim_family,claim_type,risk_class,diet_context,specificity,duration_context,evidence_status,protocol_status,created_at,updated_at

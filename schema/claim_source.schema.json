@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClaimSource",
+  "type": "object",
+  "required": ["claim_source_id", "claim_id", "contributor_id", "source_id"],
+  "properties": {
+    "claim_source_id": { "type": "string" },
+    "claim_id": { "type": "string" },
+    "contributor_id": { "type": "string" },
+    "source_id": { "type": "string" },
+    "verbatim_quote": { "type": "string" },
+    "timestamp_start": { "type": "string" },
+    "timestamp_end": { "type": "string" },
+    "receipt_url": { "type": "string" },
+    "rhetoric_strength": { "type": "string" },
+    "claim_strength": { "type": "string" },
+    "source_quality": { "type": "string" },
+    "do_not_infer": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Review",
+  "type": "object",
+  "required": ["review_id", "claim_id", "review_type", "reviewer", "review_date"],
+  "properties": {
+    "review_id": { "type": "string" },
+    "claim_id": { "type": "string" },
+    "review_type": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "review_date": { "type": "string" },
+    "summary": { "type": "string" },
+    "recommendation": { "type": "string" },
+    "next_review_due": { "type": "string" }
+  },
+  "additionalProperties": true
+}
