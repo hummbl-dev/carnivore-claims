@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Claim",
+  "type": "object",
+  "required": ["claim_id", "normalized_claim", "claim_family", "risk_class", "evidence_status", "protocol_status"],
+  "properties": {
+    "claim_id": { "type": "string" },
+    "normalized_claim": { "type": "string" },
+    "claim_family": { "type": "string" },
+    "claim_type": { "type": "string" },
+    "risk_class": { "type": "string" },
+    "diet_context": { "type": "array", "items": { "type": "string" } },
+    "specificity": { "type": "array", "items": { "type": "string" } },
+    "duration_context": { "type": "string" },
+    "evidence_status": { "type": "string" },
+    "protocol_status": { "type": "string" },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" }
+  },
+  "additionalProperties": true
+}

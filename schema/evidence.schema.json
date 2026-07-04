@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence",
+  "type": "object",
+  "required": ["evidence_id", "title", "evidence_type", "evidence_maturity"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "title": { "type": "string" },
+    "authors": { "type": "array", "items": { "type": "string" } },
+    "year": { "type": "string" },
+    "evidence_type": { "type": "string" },
+    "url": { "type": "string" },
+    "doi": { "type": "string" },
+    "institution_or_journal": { "type": "string" },
+    "evidence_maturity": { "type": "string" },
+    "domains": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}
