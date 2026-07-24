@@ -20,11 +20,26 @@ Contributors are source nodes. Claims require receipts. Evidence determines stat
 Contributor → Source → Quote/Receipt → Claim → Evidence → Risk → Protocol Decision
 ```
 
-## Status
+## Repository role
 
-Private workbench. Not public. Not medical advice.
+This is the **public documentation and projection surface** for the Carnivore Claims Ledger. It is not a private workbench.
 
-This repository should be treated as the private workbench for raw source discovery, extraction, normalization, deduplication, red-team review, and protocol-admission work. A future public release should be generated from reviewed and sanitized artifacts only.
+The repository contract is:
+
+- `ccl-workbench-private` → `carnivore-claims-ledger` → `carnivore-claims`
+- **`ccl-workbench-private`**: raw discovery, evidence and counterevidence, unresolved claims, private review, rights assessment, protocol analysis.
+- **`carnivore-claims-ledger`**: reviewed, public-bound clean claim records and promotion receipts; private until v1.
+- **`carnivore-claims`** (this repo): public methodology, schemas, corrections, and generated approved projections only.
+
+### Exclusions
+
+Raw ingestion, private-workbench material, and unreviewed claims do not belong in this repository. Raw research belongs in `ccl-workbench-private`.
+
+### Public claim requirements
+
+Public claims require provenance, evidence distance, risk, uncertainty, rights status, and promotion receipts. Truth evaluation, public publication, and protocol admission remain separate decisions.
+
+Not medical advice.
 
 ## Safety
 
